@@ -1,4 +1,4 @@
 @echo off
-set "desktop=%USERPROFILE%\Downloads"
-powercfg /batteryreport /output "%desktop%\battery-report.html"
+set "downloads=%USERPROFILE%\Downloads"
+powercfg /batteryreport /output "%downloads%\battery-report.html"
 pause
