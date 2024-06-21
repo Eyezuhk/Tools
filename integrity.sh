@@ -68,6 +68,7 @@ MODIFIED_FILE="modified_files.txt"
 # Ask the user if they want to verify integrity of a previous output
 echo "Do you want to verify the integrity of a previous output? (y/n)"
 read -r response
+echo ""
 
 if [ "$response" = "y" ]; then
     # Request the previous checksum from the user
@@ -83,7 +84,9 @@ if [ "$response" = "y" ]; then
         
         # Compare checksums
         if [ "$previous_checksum" = "$current_checksum" ]; then
+            echo ""
             echo "No changes detected."
+            echo ""
         else
             echo "Changes detected. Saving new hashes to $OUTPUT_FILE"
             echo ""
@@ -106,7 +109,11 @@ else
     calculate_hashes "$OUTPUT_FILE"
     # Calculate checksum of the hashes.txt file
     checksum=$(sha256sum "$OUTPUT_FILE" | cut -d' ' -f1)
+    echo ""
+    echo ""
     echo "Checksum of $OUTPUT_FILE: $checksum"
+    echo ""
+    
 fi
 
 # Clean up temporary files
