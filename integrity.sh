@@ -89,6 +89,7 @@ if [ "$response" = "y" ]; then
             echo "No changes detected."
             echo ""
         else
+            echo ""
             echo "Changes detected. Saving new hashes to $OUTPUT_FILE"
             echo ""
             
@@ -96,10 +97,12 @@ if [ "$response" = "y" ]; then
             if [ -f "$OUTPUT_FILE" ]; then
                 diff <(sort "$OUTPUT_FILE") <(sort "$TEMP_FILE") > "$MODIFIED_FILE"
                 echo "Modified files or rules:"
+                echo ""
                 cat "$MODIFIED_FILE"
             fi
             
             mv "$TEMP_FILE" "$OUTPUT_FILE"
+            echo ""
             echo "New checksum: $current_checksum"
         fi
     else
