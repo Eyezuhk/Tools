@@ -74,6 +74,7 @@ if [ "$response" = "y" ]; then
     # Request the previous checksum from the user
     echo "Enter the checksum of the previous output:"
     read -r previous_checksum
+    echo ""
 
     # Calculate new hashes
     calculate_hashes "$TEMP_FILE"
