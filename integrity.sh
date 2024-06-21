@@ -66,6 +66,7 @@ TEMP_FILE="temp_hashes.txt"
 MODIFIED_FILE="modified_files.txt"
 
 # Ask the user if they want to verify integrity of a previous output
+echo ""
 echo "Do you want to verify the integrity of a previous output? (y/n)"
 read -r response
 echo ""
