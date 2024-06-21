@@ -1,88 +1,113 @@
 #!/bin/bash
 
-# Função para calcular hashes
+# Function to calculate hashes
 calculate_hashes() {
     local output_file=$1
     > "$output_file"
     for file in "${FILES_TO_CHECK[@]}"; do
         echo "Processing $file..."
-        date=$(date +"%Y-%m-%d %H:%M:%S")
         if [ -f "$file" ]; then
             hash=$(sha256sum "$file" | cut -d' ' -f1)
+            echo "$file: $hash" >> "$output_file"
         elif [ -d "$file" ]; then
             hash=$(find "$file" -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+            echo "$file: $hash" >> "$output_file"
         fi
-        echo "$date $file: $hash" >> "$output_file"
         echo "Done processing $file."
     done
+
+    # Calculate hash for SSH authorized_keys files
+    for user_home in /home/*; do
+        if [ -d "$user_home/.ssh" ]; then
+            auth_keys_file="$user_home/.ssh/authorized_keys"
+            if [ -f "$auth_keys_file" ]; then
+                echo "Processing $auth_keys_file..."
+                hash=$(sha256sum "$auth_keys_file" | cut -d' ' -f1)
+                echo "$auth_keys_file: $hash" >> "$output_file"
+                echo "Done processing $auth_keys_file."
+            fi
+        fi
+    done
+
+    # Calculate hash for firewall rules
+    echo "Processing firewall rules..."
+    firewall_hash=$(iptables-save | grep -v -E '^(#|:)' | sort | sha256sum | cut -d' ' -f1)
+    echo "Firewall Rules: $firewall_hash" >> "$output_file"
+    echo "Done processing firewall rules."
 }
 
-# Arquivos e diretórios a serem verificados
+# Files and directories to be checked
 FILES_TO_CHECK=(
-    "/etc/passwd"
-    "/etc/shadow"
-    "/etc/group"
-    "/etc/sudoers"
-    "/etc/hosts"
-    "/etc/network/interfaces"
-    "/etc/resolv.conf"
-    "/etc/hosts.allow"
-    "/etc/hosts.deny"
-    "/etc/ssh/sshd_config"
-    "/etc/ssh/ssh_config"
-    "/etc/pam.d/*"
-    "/etc/apparmor/*"
-    "/etc/crontab"
-    "/var/spool/cron/*"
-    "/var/log/auth.log"
-    "/var/log/syslog"
-    "/var/log/messages"
-    "/etc/init.d/"
+    "/etc/passwd"      # User account information
+    "/etc/shadow"      # Encrypted user passwords
+    "/etc/group"       # Group information
+    "/etc/sudoers"     # sudo configuration
+    "/etc/hosts"       # Static table lookup for hostnames
+    "/etc/network/interfaces"  # Network interface configuration
+    "/etc/resolv.conf"  # DNS resolver configuration
+    "/etc/hosts.allow"  # TCP wrapper access control (allowed hosts)
+    "/etc/hosts.deny"   # TCP wrapper access control (denied hosts)
+    "/etc/ssh/sshd_config"  # SSH server configuration
+    "/etc/ssh/ssh_config"   # SSH client configuration
+    "/etc/pam.d/"      # PAM (Pluggable Authentication Modules) configuration
+    "/etc/apparmor/"   # AppArmor security profiles
+    "/etc/crontab"     # System-wide crontab
+    "/var/spool/cron/" # User-specific crontabs
+    "/var/log/auth.log"  # Authentication log
+    "/var/log/syslog"    # System log
+    "/var/log/messages"  # General message log
+    "/etc/init.d/"     # SysV init scripts
+    "/etc/iptables/"   # iptables configuration files (if stored here)
 )
 
-# Arquivo de saída
+# Output files
 OUTPUT_FILE="hashes.txt"
 TEMP_FILE="temp_hashes.txt"
+MODIFIED_FILE="modified_files.txt"
 
-# Pergunta ao usuário se ele quer verificar integridade de uma saída anterior
+# Ask the user if they want to verify integrity of a previous output
 echo "Do you want to verify the integrity of a previous output? (y/n)"
 read -r response
 
 if [ "$response" = "y" ]; then
-    # Solicita o checksum do usuário
+    # Request the previous checksum from the user
     echo "Enter the checksum of the previous output:"
     read -r previous_checksum
 
-    # Calcula os novos hashes
+    # Calculate new hashes
     calculate_hashes "$TEMP_FILE"
 
-    # Calcula o checksum do arquivo temporário
-    current_checksum=$(sha256sum "$TEMP_FILE" | cut -d' ' -f1)
-
-    # Compara os checksums
-    if [ "$previous_checksum" = "$current_checksum" ]; then
-        echo "No changes detected."
-    else
-        echo "Changes detected. Saving new hashes to $OUTPUT_FILE"
-        echo ""
-        mv "$TEMP_FILE" "$OUTPUT_FILE"
-        echo "New checksum: $current_checksum"
+    # Calculate checksum of the temporary file
+    if [ -f "$TEMP_FILE" ]; then
+        current_checksum=$(sha256sum "$TEMP_FILE" | cut -d' ' -f1)
         
-        # Identifica quais arquivos foram modificados
-        if [ -f "$OUTPUT_FILE" ]; then
-            diff <(sort "$OUTPUT_FILE") <(sort "$TEMP_FILE") > modified_files.txt
-            echo "Modified files:"
-            cat modified_files.txt
+        # Compare checksums
+        if [ "$previous_checksum" = "$current_checksum" ]; then
+            echo "No changes detected."
+        else
+            echo "Changes detected. Saving new hashes to $OUTPUT_FILE"
+            echo ""
+            
+            # Identify which files were modified
+            if [ -f "$OUTPUT_FILE" ]; then
+                diff <(sort "$OUTPUT_FILE") <(sort "$TEMP_FILE") > "$MODIFIED_FILE"
+                echo "Modified files or rules:"
+                cat "$MODIFIED_FILE"
+            fi
+            
+            mv "$TEMP_FILE" "$OUTPUT_FILE"
+            echo "New checksum: $current_checksum"
         fi
+    else
+        echo "Error: $TEMP_FILE not found."
     fi
 else
-    # Calcula os hashes e salva no arquivo de saída
+    # Calculate hashes and save to output file
     calculate_hashes "$OUTPUT_FILE"
-
-    # Calcula o checksum do arquivo hashes.txt
+    # Calculate checksum of the hashes.txt file
     checksum=$(sha256sum "$OUTPUT_FILE" | cut -d' ' -f1)
     echo "Checksum of $OUTPUT_FILE: $checksum"
 fi
 
-# Limpa arquivos temporários
-rm -f "$TEMP_FILE" modified_files.txt
+# Clean up temporary files
+rm -f "$TEMP_FILE" "$MODIFIED_FILE"
