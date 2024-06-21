@@ -104,6 +104,7 @@ if [ "$response" = "y" ]; then
             mv "$TEMP_FILE" "$OUTPUT_FILE"
             echo ""
             echo "New checksum: $current_checksum"
+            echo ""
         fi
     else
         echo "Error: $TEMP_FILE not found."
