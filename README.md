@@ -7,3 +7,8 @@
 [![TotalDownloads](https://img.shields.io/github/downloads/Eyezuhk/Tools/Battery-report.bat.svg?color=brightgreen)](https://github.com/Eyezuhk/Tools/releases/download/v1.0/Battery-report.bat)
 
 - This batch script create a relatory of battery health in Downloads\battery-report.html
+
+
+#### Integrity.sh
+
+- This shell script verify if important files on linux were changed.
