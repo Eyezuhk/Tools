@@ -53,12 +53,13 @@ FILES_TO_CHECK=(
     "/etc/apparmor/"   # AppArmor security profiles
     "/etc/crontab"     # System-wide crontab
     "/var/spool/cron/" # User-specific crontabs
-    "/var/log/auth.log"  # Authentication log
-    "/var/log/syslog"    # System log
-    "/var/log/messages"  # General message log
     "/etc/init.d/"     # SysV init scripts
     "/etc/iptables/"   # iptables configuration files (if stored here)
 )
+
+#    "/var/log/auth.log"  # Authentication log
+#    "/var/log/syslog"    # System log
+#    "/var/log/messages"  # General message log
 
 # Output files
 OUTPUT_FILE="hashes.txt"
