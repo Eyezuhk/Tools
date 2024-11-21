@@ -1,6 +1,6 @@
 import os
 
-folder_path = r"path"
+folder_path = r"C:\..."
 search_term = "Text"
 
 total_files = 0
@@ -24,7 +24,7 @@ for root, dirs, files in os.walk(folder_path):
             
 
 print(f"Total de arquivos lidos: {total_files}")
-print(f"Arquivos encontrados com a palavra 'Powered': {files_found}")
+print(f"Arquivos encontrados com a palavra '{search_term}': {files_found}")
 
 if found_files:
     print("\nCaminhos dos arquivos encontrados:")
