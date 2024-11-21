@@ -31,6 +31,6 @@ if found_files:
     for file_path in found_files:
         print(file_path)
 else:
-    print("Nenhum arquivo encontrado com a palavra 'Powered'.")
+    print("\nNenhum arquivo encontrado com a palavra 'Powered'.")
 
-print("Pesquisa concluída.")
+print("\nPesquisa concluída.")
